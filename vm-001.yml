@@ -1,0 +1,15 @@
+---
+- name: Install VM Deployment
+  hosts: vm_100
+  become: true
+
+  pre-tasks:
+    - name: install python 2
+      raw: sudo bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qy python-minimal)"
+
+  roles:
+    - nfs_client
+    - lets_encrypt
+    - fail2ban_nginx
+    - nginx
+    - https-forwarding

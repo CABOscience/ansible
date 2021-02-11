@@ -1,0 +1,56 @@
+---
+# Ports
+psql_port: 5432
+html_secure: 443
+
+# CABO
+main_domain : 'localhost'
+cabo_email  : 'myemail@gmail.com'
+cabo_user   : cabo
+cabo_grp    : cabo
+
+# nfs
+nfs_server_pkg  : nfs-kernel-server
+nfs_server_app  : nfs-kernel-server
+nfs_server_path : '/ext_data/data'
+nfs_server_ip   : '192.168.XXX.XXX'
+nfs_client_user : cabo
+nfs_client_grp  : cabo
+nfs_client_pkg  : nfs-common
+nfs_client_path : /data
+nfs_client_mount_opts: 'auto,nofail,noatime,nolock,intr,tcp,actimeo=1800'
+nfs_client_mount_fstype: 'nfs'
+
+# Nginx variables
+nginx_enabled   : '/etc/nginx/sites-enabled'
+nginx_available : '/etc/nginx/sites-available'
+
+# Directories
+dir_root    : '/var/www/path'
+dir_webapps : '{{ dir_root }}/webapps'
+## backup directory
+backup_root : '/var/backups'
+
+# Google
+google_analytics_site_verification  : google_verification
+google_analytics_account            : google_account
+
+# NGINX
+nginx_server_host: localhost
+nginx_sites:
+  web:
+    - listen 443
+    - server_name {{ nginx_server_host }}
+    - root {{ vascan_portal_dir_public }}
+    - 'location /data { 
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://localhost:8080/vis/;
+      }'
+    - 'location /data/ {
+      }'
+    - 'location /layout/ {
+      }'
+    - 'location / {
+      }'
+

@@ -1,0 +1,6 @@
+---
+- import_playbook: external.yml
+- import_playbook: internal.yml
+- import_playbook: wm-001.yml
+- import_playbook: wm-002.yml
+- import_playbook: wm-003.yml

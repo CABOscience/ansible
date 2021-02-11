@@ -1,0 +1,17 @@
+cabo001
+cabo002
+cabo003
+
+[external]
+cabo001
+
+[internal]
+cabo002
+cabo003
+
+[nfs_client]
+cabo001
+cabo002
+
+[nfs_server]
+cabo003

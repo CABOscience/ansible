@@ -1,0 +1,13 @@
+---
+# UFW packages
+ufw_pkgs:
+  - ufw
+  
+# UFW basic ports
+ufw_ports:
+  - ssh
+  - http
+  - https
+
+ufw: ufw
+apt_cache_valid_time: 3600

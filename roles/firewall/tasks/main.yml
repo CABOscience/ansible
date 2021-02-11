@@ -1,0 +1,42 @@
+---
+- name: Install UFW packages
+  become: true
+  apt:
+    pkg             : '{{ item }}'
+    state           : present
+    update_cache    : yes
+    cache_valid_time: '{{ apt_cache_valid_time }}'
+  with_items: '{{ ufw_pkgs }}'
+  tags:
+    - ufw
+    
+- name: ufw - Setup ufw
+  become: true
+  ufw:
+    state   : enabled
+    policy  : deny
+  notify:
+    - restart ufw
+  tags:
+    - ufw
+
+- name: ufw - Allow traffics ssh, http, https
+  become: true
+  ufw:
+    rule    : allow
+    port    : '{{ item }}'
+    proto   : tcp
+  with_items: "{{ ufw_ports }}"
+  notify:
+    - restart ufw
+  tags:
+    - ufw
+
+- name: Ensure ufw starts on a fresh reboot
+  become: true
+  service:
+    name    : ufw
+    state   : started
+    enabled : yes
+  tags:
+    - ufw

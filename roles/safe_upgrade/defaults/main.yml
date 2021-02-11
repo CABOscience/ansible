@@ -1,0 +1,6 @@
+---
+# update packages
+update_pkgs:
+    - aptitude
+
+apt_cache_valid_time: 3600
