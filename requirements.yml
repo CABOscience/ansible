@@ -1,1 +1,7 @@
+---
+roles:
+  - src: stefangweichinger.ansible_rclone
+  - src: geerlingguy.nginx
 
+collections:
+  - name:  

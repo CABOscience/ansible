@@ -1,0 +1,32 @@
+---
+- name: Update apt cache
+  apt:
+    pkg   : git
+    state : latest
+    update_cache: yes
+ 
+- name: Download cabo static from github
+  ansible.builtin.git:
+    repo  : https://github.com/CABOscience/static_pages.git
+    dest  : '{{ web_static_directory }}'
+    force : yes
+
+- name: Clean from github
+  ansible.builtin.file:
+    dest  : '{{ web_static_directory }}/{{ item }}'
+    state : absent
+  loop:
+    - "LICENSE"
+    - "README.md"
+    - ".git"
+
+#
+# Not sure about that part
+#
+#- name: Change the chmod file
+#  file:
+#    dest    : '{{ web_static_directory }}'
+#    mode    : u=rwX,g=rX,o=rX
+#    recurse : yes
+
+

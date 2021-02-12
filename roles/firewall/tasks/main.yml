@@ -1,42 +1,25 @@
 ---
 - name: Install UFW packages
-  become: true
   apt:
-    pkg             : '{{ item }}'
+    pkg             : 'ufw'
     state           : present
     update_cache    : yes
     cache_valid_time: '{{ apt_cache_valid_time }}'
-  with_items: '{{ ufw_pkgs }}'
-  tags:
-    - ufw
     
 - name: ufw - Setup ufw
-  become: true
-  ufw:
+  community.general.ufw:
     state   : enabled
     policy  : deny
-  notify:
-    - restart ufw
-  tags:
-    - ufw
 
-- name: ufw - Allow traffics ssh, http, https
-  become: true
-  ufw:
+- name: ufw - Allow traffics
+  community.general.ufw:
     rule    : allow
     port    : '{{ item }}'
     proto   : tcp
   with_items: "{{ ufw_ports }}"
-  notify:
-    - restart ufw
-  tags:
-    - ufw
 
 - name: Ensure ufw starts on a fresh reboot
-  become: true
-  service:
+  ansible.builtin.service:
     name    : ufw
-    state   : started
+    state   : restarted
     enabled : yes
-  tags:
-    - ufw
