@@ -5,8 +5,7 @@
   
   roles:
     - nfs_client
-    - backup-google-drive
-    - backup-fulcrum
+    - stefangweichinger.ansible_rclone
     - fulcrum-post-processing
     - fulcrum-webhook
     - fulcrum-scripts
