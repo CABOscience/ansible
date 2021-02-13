@@ -2,6 +2,7 @@
 roles:
   - src: stefangweichinger.ansible_rclone
   - src: geerlingguy.nginx
+  - src: geerlingguy.pip
 
 collections:
   - name:  
