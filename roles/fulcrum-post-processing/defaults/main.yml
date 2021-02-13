@@ -1,0 +1,23 @@
+---
+# directories
+fpp_directory: '~/'
+fpp_modules_directory: '~/'
+
+pip_install_packages:
+  - name: pandas
+    version: "1.2.2"
+  - name: scipy
+    version: "1.6.0"
+  - name: setuptools
+    version: "53.0.0"
+  - name: multiprocessing
+    version: "2.6.2.1"
+  - name:  configparser
+    version: "5.0.1"
+  - name: numpy
+    version: "1.20.1"
+  - name: matplotlib
+    version: "3.3.4"
+  # not sure that one is used
+  - name: urllib3
+    version: "1.26.3"
