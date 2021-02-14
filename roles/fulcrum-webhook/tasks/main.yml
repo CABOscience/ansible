@@ -1,0 +1,26 @@
+---
+# Install the app, note: don't do these tasks with become sudo
+- name: Copy application files
+  files:
+    src: '{{ item }}'
+    dest: '{{ webhook_app_directory }}/{{ item }}'
+  loop:
+    - wsgi.py
+    - '{{ app_name }}.py'
+
+- name: install modules in a virtualenv
+  pip:
+    requirements: '{{ webhook_app_directory }}/requirements.txt'
+    virtualenv: '{{ webhook_app_directory }}/env'
+    #virtualenv_python: '{{ ansible_python_version }}'
+
+# Configure app systemd service and nginx
+- name: template systemd service config
+  become: yes
+  copy:
+    src: .service
+    dest: /etc/systemd/system/{{ app_name }}.service
+
+- name: start systemd app service
+  become: yes
+  systemd: name={{ app_name }}.service state=restarted enabled=yes
