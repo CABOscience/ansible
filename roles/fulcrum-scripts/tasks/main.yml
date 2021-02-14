@@ -1,0 +1,11 @@
+---
+- name: Load scripts
+  template:
+    src: "default_script.sh.j2"
+    dest: '{{ scripts_directory }}/{{ item.name }}'
+  loop: '{{ scripts_dicts }}'
+
+- name: Prepare cron
+  template:
+    src: "cron_cabo.j2"
+    dest: '/etc/cron.d/cron_cabo'

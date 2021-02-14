@@ -1,0 +1,8 @@
+---
+# directories
+scripts_directory: '~/'
+
+scripts_dicts:
+  - name: myscript
+    script_content: 'echo $_'
+    cron: '* * * * * /bin/bash {{ scripts_directory }}/myscript.sh'

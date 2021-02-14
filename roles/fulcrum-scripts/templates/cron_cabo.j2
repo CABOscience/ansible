@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+
+{% for ditem in scripts_dicts %}
+{{ ditem.cron }}
+{% endfor %}
