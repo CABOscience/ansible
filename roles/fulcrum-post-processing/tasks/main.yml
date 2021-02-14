@@ -1,7 +1,7 @@
 ---
 - name: Update apt cache
   apt:
-    pkg   : git, pip3
+    pkg   : git
     state : latest
     update_cache: yes
  
@@ -19,5 +19,5 @@
 
 - name: Install specdal module
   ansible.builtin.shell:
-    cmd: python setup.py install
+    cmd: python3 setup.py install
     chdir: '{{ fpp_modules_directory }}'
