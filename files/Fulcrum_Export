@@ -1,0 +1,15 @@
+[defaults]
+inventory = inventories/
+# change display of log
+stdout_callback = yaml
+# disable host key checking
+host_key_checking = false
+# Installs collections into [current dir]/ansible_collections/namespace/collection_name
+collections_paths = ./
+# Installs roles into [current dir]/roles/namespace.rolename
+roles_path = ./ansible-roles
+allow_world_readable_tmpfiles=true
+timeout = 90
+
+[ssh_connection]
+ssh_args = -C -o ControlMaster=auto -o ControlPersist=90s 

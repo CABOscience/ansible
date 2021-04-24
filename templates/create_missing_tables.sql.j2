@@ -1,0 +1,74 @@
+DROP TABLE spectra_processed;
+CREATE TABLE IF NOT EXISTS spectra_processed (
+    id uuid DEFAULT public.uuid_generate_v1() NOT NULL PRIMARY KEY,
+  record_id TEXT, 
+  sample_id INT, 
+  scientific_name TEXT, 
+  date_measured DATE, 
+  measured_by TEXT, 
+  spectroradiometer_start_time TIME, 
+  spectroradiometer_id TEXT, 
+  instrumentation_id TEXT, 
+  leaf_side_measured TEXT, 
+  reflectance_transmittance VARCHAR(40), 
+  wavelength real, 
+  r_t_average DOUBLE PRECISION, 
+  r_t_std DOUBLE PRECISION
+);
+
+CREATE TABLE public.spectra_leaves (
+    id uuid DEFAULT public.uuid_generate_v1() NOT NULL PRIMARY KEY,
+    record_id text,
+    sample_id integer,
+    file_name text,
+    leaf_number integer,
+    leaf_side_measured character varying(100),
+    reflectance_transmittance character varying(40),
+    wavelength real,
+    raw_value double precision,
+    calculated_value double precision,
+    sample_id2 text
+);
+
+DROP TABLE api_keys;
+CREATE TABLE IF NOT EXISTS api_keys (
+	id SERIAL PRIMARY KEY, 
+	token text, 
+	created_at timestamp with time zone, 
+	updated_at timestamp with time zone, 
+	user_id INT
+);
+INSERT INTO api_keys (token,user_id) VALUES ('{{ api_token }}',1);
+
+CREATE TYPE IF NOT EXISTS enum_users_role AS ENUM ('user', 'admin', 'reader');
+DROP TABLE users;
+CREATE TABLE IF NOT EXISTS public.users (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    lastname character varying(255) NOT NULL,
+    email character varying(255) NOT NULL,
+    role public.enum_users_role DEFAULT 'user'::public.enum_users_role NOT NULL,
+    organization character varying(255),
+    password character varying(255) NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+INSERT INTO users (id,name,lastname,email,role,organization,password,created_at,updated_at) VALUES (1,'{{ api_admin_name }}','{{ api_admin_lastname }}','{{ api_admin_email }}','{{ api_admin_role }}','{{ api_admin_organization }}','{{ api_admin_password }}','{{ api_admin_created_at }}','{{ api_admin_updated_at }}');
+
+
+CREATE INDEX idx_leaf_spectra_sci_name ON public.leaf_spectra USING btree (scientific_name);
+CREATE INDEX idx_spectra_leaf_id ON public.spectra_leaves USING btree (record_id);
+CREATE INDEX idx_spectra_proc_id ON public.spectra_processed USING btree (record_id);
+CREATE INDEX leaf_spectra_id ON public.spectra_leaves USING btree (record_id);
+CREATE INDEX leaf_spectra_processed_wavelength ON public.spectra_leaves USING btree (wavelength);
+CREATE INDEX leaf_spectra_processed_wavelength_id ON public.spectra_leaves USING btree (record_id, wavelength);
+CREATE INDEX sci_names ON public.spectra_processed USING btree (scientific_name);
+CREATE INDEX sid2 ON public.spectra_leaves USING btree (sample_id2);
+CREATE INDEX spectra_leaves_sample_id_wavelength_idx ON public.spectra_leaves USING btree (sample_id, wavelength);
+CREATE INDEX spectra_processed_sample_id_idx ON public.spectra_processed USING btree (sample_id);
+CREATE INDEX spectra_processed_sample_id_wavelength_idx ON public.spectra_processed USING btree (sample_id, wavelength);
+CREATE INDEX spectra_processed_wavelength ON public.spectra_processed USING btree (wavelength);
+CREATE INDEX spectra_processed_wavelength_id ON public.spectra_processed USING btree (record_id, wavelength);
+
+CREATE MATERIALIZED VIEW scientific_names_in_spectra AS SELECT spectra_processed.scientific_name, count(*) AS cnt FROM spectra_processed GROUP BY spectra_processed.scientific_name;
+
