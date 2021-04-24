@@ -1,13 +1,18 @@
 ---
-- name: Update apt cache
+- name: Install git
   apt:
     pkg   : git
     state : latest
     update_cache: yes
- 
-- name: Download cabo static from github
+
+- name: Create directory for static
+  ansible.builtin.file:
+    path: '{{ web_static_directory }}'
+    state: absent
+
+- name: Download Static pages from github
   ansible.builtin.git:
-    repo  : https://github.com/CABOscience/static_pages.git
+    repo  : '{{ web_static_github_link }}'
     dest  : '{{ web_static_directory }}'
     force : yes
 

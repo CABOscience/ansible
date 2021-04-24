@@ -1,0 +1,13 @@
+---
+api_user: db
+api_grp: db
+api_git_repo_url: https://github.com/CABOscience/cabo-api.git
+api_git_version: master
+api_directory: ~/cabo-api
+api_node_env: production
+api_name: api
+api_db_cluster_name: api_db
+api_db_name: api_name
+api_db_directory: ~/postgres13db
+api_db_version: 13
+api_session_secret: MYBESTSECRET

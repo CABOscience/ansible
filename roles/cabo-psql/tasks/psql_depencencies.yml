@@ -1,0 +1,21 @@
+---
+- name: Add Postgres13 repo
+  ansible.builtin.apt_repository:
+    repo: deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main
+    state: present
+
+- name: Install packages
+  ansible.builtin.apt:
+    pkg:
+      - git
+      - libpq-dev
+      - python3-psycopg2
+      - postgresql-13-postgis-3
+      - postgresql-13
+      - redis
+      - unzip
+
+- name: Add the user
+  ansible.builtin.user:
+    name: '{{ api_user }}'
+    group: '{{ api_grp }}'

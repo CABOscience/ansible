@@ -1,0 +1,10 @@
+---
+# VIS
+vis_user: vis
+vis_grp: vis
+vis_git_repo_url: https://github.com/CABOscience/cabo-vis.git
+vis_git_version: master
+vis_directory: ~/vis
+vis_node_env: production
+vis_env_var: |
+    VUE_APP_CABO_API_KEY=MYBESTAPIVALUE

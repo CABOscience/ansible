@@ -1,17 +1,17 @@
-cabo001
-cabo002
-cabo003
+cabo100
+cabo110
+cabo200
 
 [external]
-cabo001
+cabo100
 
 [internal]
-cabo002
-cabo003
+cabo200
+cabo110
 
 [nfs_client]
-cabo001
-cabo002
+cabo100
+cabo110
 
 [nfs_server]
-cabo003
+cabo200

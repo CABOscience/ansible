@@ -1,0 +1,74 @@
+---
+- name: Install packages
+  ansible.builtin.apt:
+    pkg:
+      - git
+      - npm
+
+- name: npm install pm2
+  community.general.npm:
+    name: pm2
+    global: yes
+
+- name: Add the user
+  ansible.builtin.user:
+    name: '{{ vis_user }}'
+    group: '{{ vis_grp }}'
+
+- name: Create data directory
+  ansible.builtin.file:
+    path: '{{ vis_directory }}'
+    state: '{{ item }}'
+    mode: '0755'
+  loop:
+    - absent
+    - directory
+
+- name: Pull API from Git
+  ansible.builtin.git:
+    repo: '{{ vis_git_repo_url }}'
+    dest: '{{ vis_directory }}'
+    version: '{{ vis_git_version }}'
+    force: true
+
+- name: Load env file
+  ansible.builtin.template:
+    src: "env.j2"
+    dest: '{{ vis_directory }}/.env'
+
+- name: Change folder ownership
+  ansible.builtin.file:
+    path: '{{ vis_directory }}'
+    owner: '{{ vis_user }}'
+    group: '{{ vis_grp }}'
+    recurse: yes
+
+#- name: npm install
+#  become_user: '{{ vis_user }}'
+#  community.general.npm:
+#    path: '{{ vis_directory }}'
+#  environment:
+#    NODE_ENV: '{{ vis_node_env }}'
+
+- name: npm install
+  become_user: '{{ vis_user }}'
+  ansible.builtin.shell:
+    cmd: npm install --save
+  args:
+    chdir: '{{ vis_directory }}'
+
+- name: npm install
+  become_user: '{{ vis_user }}'
+  ansible.builtin.shell:
+    cmd: npm audit fix
+  args:
+    chdir: '{{ vis_directory }}'
+
+- name: npm run build
+  become_user: '{{ vis_user }}'
+  ansible.builtin.shell:
+    cmd: npm run build
+  args:
+    chdir: '{{ vis_directory }}'
+  environment:
+    NODE_ENV: '{{ vis_node_env }}'

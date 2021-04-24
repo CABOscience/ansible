@@ -1,13 +1,25 @@
 ---
-- name: Install VM Deployment
-  hosts: cabo001
+- name: Install VM web
+  hosts: cabo100
   become: true
 
+  vars_files:
+    - ../cabo100_variables.yml
+
+  pre_tasks:
+    - name: Install crontab
+      apt:
+        pkg   : rsync
+        state : latest
+
   roles:
-    - nfs_client
-    - lets_encrypt
-    - fail2ban_nginx
-    - nginx
-    - static-web
-    #- db # To be done
-    - vis
+    #- nfs-client
+    #- static-web
+    #- geerlingguy.nginx
+    #- geerlingguy.certbot
+    #- data-web
+    - cabo-psql
+    #- cabo-api
+    #- cabo-vis
+    #- fail2ban
+    #- fail2ban_nginx

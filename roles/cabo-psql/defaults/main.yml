@@ -1,0 +1,14 @@
+---
+# directories
+db_user: db
+db_grp: db
+other_psql_files:
+  - dst: create_missing_tables.sql
+    src: create_missing_tables.sql.j2
+psql_bash_dict:
+  - dest: '~/psql-scripts/copy_data.sh'
+    command: |
+      find ~/psql-fulcrum-data/ -name *_data.sql  -execdir psql -d "{{ db_name }}" -f {} +
+  - dest: '~/psql-scripts/execute_copy_data.sh'
+    command: |
+      sudo /bin/su -c "~/psql-scripts/copy_data.sh" - {{ db_user }}

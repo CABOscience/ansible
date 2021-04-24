@@ -1,0 +1,35 @@
+---
+# clean directories
+- name: DROP cluster if it exists !! completely delete a PostgreSQL cluster !!
+  ansible.builtin.shell:
+    cmd: 'pg_dropcluster --stop {{ api_db_version }} {{ api_db_cluster_name }}' 
+  ignore_errors: yes
+
+- name: Remove and Recreate data directory if it exists !! DELETES All remaining files !!
+  ansible.builtin.file:
+    path: '{{ api_db_directory }}'
+    state: '{{ item }}'
+    owner: '{{ api_user }}'
+    group: '{{ api_grp }}'
+    mode: '0700'
+  loop:
+    - absent
+    - directory
+
+# Clean systemctl
+- name: Make sure a service is Stopped
+  ansible.builtin.systemd:
+    state: stopped
+    name: mypgcluster
+  ignore_errors: yes
+
+- name: Load Systemclt service file
+  ansible.builtin.template:
+    src: "mypgcluster.service.j2"
+    dest: '/lib/systemd/system/mypgcluster.service'
+
+- name: Daemon-reload and enable service
+  ansible.builtin.systemd:
+    daemon_reload: yes
+    name: mypgcluster
+    enabled: yes

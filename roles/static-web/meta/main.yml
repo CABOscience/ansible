@@ -1,0 +1,5 @@
+---
+#allow_duplicates: yes
+# Move as a separate role
+#dependencies:
+#- { role: geerlingguy.nginx }

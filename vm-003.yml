@@ -1,9 +1,13 @@
 ---
-- name: Install vm-003
-  hosts: vm-003
+- name: Install VM NAS
+  hosts: cabo200
   become: true
   gather_facts: true
 
+  vars_files:
+    - ../cabo200_variables.yml
+
   roles:
-    - nfs_volume
-    - nfs_server
+    - role: nfs-volume
+    - role: nfs-server
+    - role: geerlingguy.nfs

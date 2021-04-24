@@ -1,0 +1,45 @@
+---
+# initiate db
+- name: Initialize DB on NAS
+  ansible.builtin.shell:
+    cmd: 'pg_createcluster -u {{ api_user }} -d {{ api_db_directory }} {{ api_db_version }} {{ api_db_cluster_name }}'
+
+- name: Grant user '{{ api_user }}' access to db using peer authentication.
+  community.postgresql.postgresql_pg_hba:
+    dest: '{{ api_db_directory }}/pg_hba.conf'
+    contype: local
+    users: '{{ api_user }}'
+    databases: '{{ api_user }}'
+    method: trust
+    create: true
+
+- name: Start deamon
+  ansible.builtin.systemd:
+    name: mypgcluster
+    state: started
+
+# It should exist another way become_user: '{{ api_user }}'
+- name: Create a new database with name '{{ api_db_name }}'
+  become: yes
+  become_user: '{{ api_user }}'
+  community.general.postgresql_db:
+    name: '{{ api_db_name }}'
+    login_user: '{{ api_user }}'
+
+# It should exist another way to use become_user: '{{ api_user }}'
+- name: Add extensions to the database '{{ api_db_name }}'
+  become: yes
+  become_user: '{{ api_user }}'
+  community.postgresql.postgresql_ext:
+    login_user: '{{ api_user }}'
+    name: '{{ item }}'
+    db: '{{ api_db_name }}'
+  loop:
+    - postgis
+    - uuid-ossp
+
+- name: ensure that redis is enabled and started
+  ansible.builtin.service:
+    name: redis
+    state: started
+    enabled: yes

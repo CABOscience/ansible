@@ -1,0 +1,5 @@
+---
+# directories
+data_web_directory: ~/data-web
+data_web_source: ~/data-web/source
+data_web_project: ~/data-web/projects

@@ -1,7 +1,17 @@
 ---
 # directories
-fpp_directory: '~/'
-fpp_modules_directory: '~/'
+fpp_directory: '~/fulcrum_pp'
+fpp_modules_directory: '~/python_modules'
+fpp_modules_version: 'master'
+
+fpp_modules:
+  - name: specdal
+    git: https://github.com/CABOscience/SpecDAL.git
+    version: caboscience-p3
+
+fpp_config_content: |
+    [DEFAULT]
+    Debug = True 
 
 pip_install_packages:
   - name: pandas
@@ -21,3 +31,5 @@ pip_install_packages:
   # not sure that one is used
   - name: urllib3
     version: "1.26.3"
+  - name: fulcrum
+

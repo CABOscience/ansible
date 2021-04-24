@@ -1,26 +1,51 @@
 ---
-# Install the app, note: don't do these tasks with become sudo
 - name: Copy application files
-  files:
-    src: '{{ item }}'
-    dest: '{{ webhook_app_directory }}/{{ item }}'
-  loop:
-    - wsgi.py
-    - '{{ app_name }}.py'
+  ansible.builtin.file:
+    path: '{{ webhook_app_directory }}/.env'
+    state: directory
+    mode: '0755'
 
-- name: install modules in a virtualenv
+- name: Load wsgi.py
+  ansible.builtin.template:
+    src: wsgi.py.j2
+    dest: '{{ webhook_app_directory }}/wsgi.py'
+
+- name: Load App
+  ansible.builtin.template:
+    src: app_name.py.j2
+    dest: '{{ webhook_app_directory }}/{{ app_name }}.py'
+
+- name: Load Webhook requirements
+  ansible.builtin.template:
+    src: requirements.j2
+    dest: '{{ webhook_app_directory }}/requirements.txt'
+
+- name: Install modules in a virtualenv
   pip:
     requirements: '{{ webhook_app_directory }}/requirements.txt'
-    virtualenv: '{{ webhook_app_directory }}/env'
-    #virtualenv_python: '{{ ansible_python_version }}'
+    virtualenv: '{{ webhook_env_directory }}'
 
-# Configure app systemd service and nginx
-- name: template systemd service config
+- name: Load Service template
   become: yes
-  copy:
-    src: .service
-    dest: /etc/systemd/system/{{ app_name }}.service
+  ansible.builtin.template:
+    src: webhook_service.j2
+    dest: '/etc/systemd/system/{{ app_name }}.service'
 
-- name: start systemd app service
+- name: Reload Deamon
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: 'Enable and Start {{ app_name }} service'
   become: yes
-  systemd: name={{ app_name }}.service state=restarted enabled=yes
+  systemd:
+    name: '{{ app_name }}.service'
+    state: restarted
+    enabled: yes
+
+- name: Recursively change ownership of a directory
+  ansible.builtin.file:
+    path: '{{ webhook_app_directory }}'
+    state: directory
+    recurse: yes
+    owner: '{{ default_user }}'
+    group: '{{ default_grp }}'

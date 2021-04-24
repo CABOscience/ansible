@@ -1,0 +1,32 @@
+---
+- name: Directory for psql other
+  ansible.builtin.file:
+    path: '{{ default_home }}/psql-other'
+    state: '{{ item }}'
+    owner: '{{ api_user }}'
+    group: '{{ api_grp }}'
+    mode: 0775
+  loop:
+    - absent
+    - directory
+
+- name: Copy file with owner and permissions
+  ansible.builtin.template:
+    src: '{{ item.src }}'
+    dest: '{{ default_home }}/psql-other/{{ item.dst }}'
+    owner: '{{ api_user }}'
+    group: '{{ api_grp }}'
+    mode: 0775
+    force: yes
+  loop: '{{ other_psql_files }}'
+
+
+#- import_tasks: psql_depencencies.yml
+
+#- import_tasks: psql_clean.yml
+
+#- import_tasks: psql_systemd.yml
+
+#- import_tasks: psql_install.yml
+
+#- import_tasks: psql_load.yml

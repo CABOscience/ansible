@@ -1,0 +1,127 @@
+---
+# Fulcrum data
+- name: Directory for psql fulcrum
+  ansible.builtin.file:
+    path: '{{ default_home }}/psql-fulcrum'
+    state: '{{ item }}'
+    owner: '{{ api_user }}'
+    group: '{{ api_grp }}'
+    mode: 0775
+  loop:
+    - absent
+    - directory
+
+- name: Load zip from fulcrum
+  ansible.builtin.unarchive:
+    src: Fulcrum_Export.zip
+    dest: '{{ default_home }}/psql-fulcrum'
+    owner: '{{ api_user }}'
+    group: '{{ api_grp }}'
+    mode: 0775
+
+- name: Find sql files
+  ansible.builtin.find:
+    paths: '{{ default_home }}/psql-fulcrum'
+    recurse: yes
+    file_type: file
+    patterns: '*.sql'
+  register: sqlfile_out
+
+- name: Duplicate files create
+  become: yes
+  become_user: '{{ api_user }}'
+  ansible.builtin.copy:
+    remote_src: yes
+    src: '{{ item.path }}'
+    dest: '{{ item.path }}_create.sql'
+  loop: '{{ sqlfile_out.files }}'
+
+- name: Duplicate files data
+  become: yes
+  become_user: '{{ api_user }}'
+  ansible.builtin.copy:
+    remote_src: yes
+    src: '{{ item.path }}'
+    dest: '{{ item.path }}_data.sql'
+  loop: '{{ sqlfile_out.files }}'
+
+- name: Remove extra lines in create
+  become: yes
+  become_user: '{{ api_user }}'
+  ansible.builtin.lineinfile:
+    path: '{{ item.path }}_create.sql'
+    state: absent
+    regexp: '^(DELETE|WHERE|INSERT|VALUES|\()'
+  loop: '{{ sqlfile_out.files }}'
+
+- name: Remove extra lines in data
+  become: yes
+  become_user: '{{ api_user }}'
+  ansible.builtin.lineinfile:
+    path: '{{ item.path }}_data.sql'
+    state: absent
+    regexp: '^(CREATE|\s{2}\"|\)\;)'
+  loop: '{{ sqlfile_out.files }}'
+
+- name: Restore File in database
+  become: yes
+  become_user: '{{ api_user }}'
+  community.general.postgresql_db:
+    login_user: '{{ api_user }}'
+    name: '{{ api_db_name }}'
+    state: restore
+    target: '{{ item.path }}_create.sql'
+  loop: '{{ sqlfile_out.files }}'
+
+# Other data
+- name: Directory for psql other
+  ansible.builtin.file:
+    path: '{{ default_home }}/psql-other'
+    state: '{{ item }}'
+    owner: '{{ api_user }}'
+    group: '{{ api_grp }}'
+    mode: 0775
+  loop:
+    - absent
+    - directory
+
+- name: Copy file with owner and permissions
+  ansible.builtin.template:
+    src: '{{ item.src }}'
+    dest: '{{ default_home }}/psql-other/{{ item.dst }}'
+    owner: '{{ api_user }}'
+    group: '{{ api_grp }}'
+    mode: 0775
+    force: yes
+  loop: '{{ other_psql_files }}'
+
+- name: load an existing database to a file
+  become: yes
+  become_user: '{{ api_user }}'
+  community.general.postgresql_db:
+    login_user: '{{ api_user }}'
+    name: '{{ api_db_name }}'
+    state: restore
+    target: '{{ default_home }}/psql-other/{{ item.dst }}'
+  loop: '{{ other_psql_files }}'
+
+# Load bash script to load data
+- name: Directory for psql scripts
+  ansible.builtin.file:
+    path: '{{ default_home }}/psql-scripts'
+    state: '{{ item }}'
+    owner: '{{ default_user }}'
+    group: '{{ api_grp }}'
+    mode: 0750
+  loop:
+    - absent
+    - directory
+
+- name: Load psql scripts
+  ansible.builtin.template:
+    src: "script_bash.sh.j2"
+    dest: '{{ item.dest }}'
+    owner: '{{ default_user }}'
+    group: '{{ api_grp }}'
+    mode: 0750
+  loop: '{{ psql_bash_dict }}'

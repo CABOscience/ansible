@@ -1,8 +1,18 @@
 ---
 # directories
 scripts_directory: '~/'
+fpp_directory: '{{ scripts_directory }}/fpp'
+scripts_user: '{{ default_user }}'
+scripts_grp:  '{{ default_grp }}'
+scripts_directory: '{{ scripts_directory }}/scripts'
 
 scripts_dicts:
   - name: myscript
-    script_content: 'echo $_'
+    script_content: |
+      echo $_
     cron: '* * * * * /bin/bash {{ scripts_directory }}/myscript.sh'
+    owner: owner
+    group: group
+    mode: mode
+
+

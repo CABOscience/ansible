@@ -1,3 +1,4 @@
 ---
 # directories
 web_static_directory: '~/'
+web_static_github_link: 'https://github.com/CABOscience/static_pages.git'

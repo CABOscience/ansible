@@ -1,11 +1,21 @@
 ---
-- name: Install Python 2
-  hosts: cabo002
+- name: Install VM calcul
+  hosts: cabo110
   become: true
   
+  vars_files:
+    - ../cabo110_variables.yml
+
+  pre_tasks:
+    - name: Install crontab
+      apt:
+        pkg   : rsync
+        state : latest
+
   roles:
-    - nfs_client
+    - nfs-client
     - stefangweichinger.ansible_rclone
+    - fulcrum-scripts
     - fulcrum-post-processing
     - fulcrum-webhook
-    - fulcrum-scripts
+    - geerlingguy.nginx

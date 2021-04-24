@@ -1,0 +1,19 @@
+---
+# Clean systemctl
+- name: Make sure a service is Stopped
+  ansible.builtin.systemd:
+    state: stopped
+    name: mypgcluster
+  ignore_errors: yes
+
+# Install systemctl
+- name: Load Systemclt service file
+  ansible.builtin.template:
+    src: "mypgcluster.service.j2"
+    dest: '/lib/systemd/system/mypgcluster.service'
+
+- name: Daemon-reload and enable service
+  ansible.builtin.systemd:
+    daemon_reload: yes
+    name: mypgcluster
+    enabled: yes

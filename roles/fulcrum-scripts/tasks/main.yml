@@ -1,8 +1,21 @@
 ---
+- name: Creates directory
+  become: true
+  file:
+    path: '{{ item.dir }}'
+    state: directory
+    owner: '{{ item.owner }}'
+    group: '{{ item.group }}'
+  loop: '{{ scripts_dicts }}'
+
 - name: Load scripts
+  become: true
   template:
-    src: "default_script.sh.j2"
-    dest: '{{ scripts_directory }}/{{ item.name }}'
+    src: "default_scripts.sh.j2"
+    dest: '{{ item.dest }}'
+    owner: '{{ item.owner }}'
+    group: '{{ item.group }}'
+    mode: '{{ item.mode }}'
   loop: '{{ scripts_dicts }}'
 
 - name: Prepare cron

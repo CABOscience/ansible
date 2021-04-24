@@ -4,6 +4,6 @@
   become: true
 
   roles:
-    - basic_install
+    - basic-install
     - firewall
-    - fail2ban
+    - oefenweb.fail2ban

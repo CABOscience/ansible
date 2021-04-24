@@ -1,0 +1,126 @@
+---
+- name: Install packages
+  ansible.builtin.apt:
+    pkg:
+      - git
+
+- name: Add the user
+  ansible.builtin.user:
+    name: '{{ api_user }}'
+    group: '{{ api_grp }}'
+
+# Stop and kill
+- name: PM2 kill
+  become_user: '{{ api_user }}'
+  ansible.builtin.shell:
+    cmd: pm2 kill --name '{{ api_name }}'
+  ignore_errors: yes
+
+- name: Stop PM2 from systemd
+  ansible.builtin.service:
+    name: 'pm2-{{ api_user }}'
+    state: stopped
+    enabled: false
+  ignore_errors: yes
+
+- name: Just force systemd to reread configs
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+# Install
+- name: Create '{{ api_directory }}' directory
+  ansible.builtin.file:
+    path: '{{ api_directory }}'
+    owner: '{{ api_user }}'
+    group: '{{ api_grp }}'
+    state: '{{ item }}'
+    mode: '0755'
+  loop:
+    - absent
+    - directory
+
+- name: Pull API from GIt
+  ansible.builtin.git:
+    repo: '{{ api_git_repo_url }}'
+    dest: '{{ api_directory }}'
+    version: '{{ api_git_version }}'
+    force: true
+
+- name: Change folder ownership
+  ansible.builtin.file:
+    path: '{{ api_directory }}'
+    owner: '{{ api_user }}'
+    group: '{{ api_grp }}'
+    recurse: yes
+
+- name: npm install
+  become_user: '{{ api_user }}'
+  community.general.npm:
+   path: '{{ api_directory }}'
+
+- name: Gulp clean
+  become_user: '{{ api_user }}'
+  ansible.builtin.shell:
+    cmd: gulp clean
+  args:
+    chdir: '{{ api_directory }}'
+
+- name: Gulp
+  become_user: '{{ api_user }}'
+  ansible.builtin.shell:
+    cmd: gulp
+  args:
+    chdir: '{{ api_directory }}'
+
+- name: PM2 startup
+  become_user: '{{ api_user }}'
+  ansible.builtin.shell:
+    cmd: pm2 start startdev.js --name '{{ api_name }}'
+  args:
+    chdir: '{{ api_directory }}'
+  environment:
+    NODE_ENV: '{{ api_node_env }}'
+    SESSIONSECRET: '{{ api_session_secret }}'
+    
+- name: PM2 save
+  become_user: '{{ api_user }}'
+  ansible.builtin.shell:
+    cmd: pm2 save
+  args:
+    chdir: '{{ api_directory }}'
+
+- name: PM2 save
+  become_user: '{{ api_user }}'
+  ansible.builtin.shell:
+    cmd: pm2 stop '{{ api_name }}'
+  args:
+    chdir: '{{ api_directory }}'
+   
+
+# systemd
+- name: PM2 systemd
+  ansible.builtin.shell:
+    cmd: env PATH=$PATH:/usr/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u '{{ api_user }}' --hp /home/'{{ api_user }}'
+
+- name: Make sure group wheel is not in the sudoers configuration
+  ansible.builtin.lineinfile:
+    path: '/etc/systemd/system/pm2-{{ api_user }}.service'
+    state: absent
+    regexp: '^PIDFile'
+
+- name: Just force systemd to reread configs
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Start PM2 from systemd
+  ansible.builtin.systemd:
+    name: 'pm2-{{ api_user }}'
+    enabled: yes
+
+- name: Start PM2 from systemd
+  ansible.builtin.systemd:
+    name: 'pm2-{{ api_user }}'
+    state: '{{ item }}'
+  loop:
+    - started
+    - restarted

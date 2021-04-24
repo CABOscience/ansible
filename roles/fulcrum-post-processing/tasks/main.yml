@@ -11,13 +11,37 @@
     dest  : '{{ fpp_directory }}'
     force : yes
 
+- name: Prepare config
+  template:
+    src: "config.ini.j2"
+    dest: '{{ fpp_directory }}/config.ini'
+
+- name: Prepare directory for modules
+  ansible.builtin.file:
+    path: '{{ fpp_modules_directory }}'
+    state: '{{ item }}'
+  loop:
+    - absent
+    - directory
+
 - name: Download Specdal from github
   ansible.builtin.git:
-    repo  : https://github.com/CABOscience/SpecDAL.git
-    dest  : '{{ fpp_modules_directory }}'
+    repo  : '{{ item.git }}'
+    dest  : '{{ fpp_modules_directory }}/{{ item.name }}'
+    version: '{{ item.version }}'
     force : yes
+  loop: '{{ fpp_modules }}'
 
 - name: Install specdal module
   ansible.builtin.shell:
     cmd: python3 setup.py install
-    chdir: '{{ fpp_modules_directory }}'
+    chdir: '{{ fpp_modules_directory }}/{{ item.name }}'
+  loop: '{{ fpp_modules }}'
+
+- name: Recursively change ownership of '{{ fpp_directory }}'
+  ansible.builtin.file:
+    path: '{{ fpp_directory }}'
+    state: directory
+    recurse: yes
+    owner: '{{ default_user }}'
+    group: '{{ default_user }}'

@@ -1,0 +1,36 @@
+---
+- name: Create directory for data-web
+  ansible.builtin.file:
+    path: '{{ data_web_directory }}/photos'
+    state: directory
+    owner: '{{ default_user }}'
+    group: '{{ default_grp }}'
+
+- name: Find images directory
+  ansible.builtin.find:
+    paths: '{{ data_web_source }}'
+    recurse: yes
+    file_type: directory
+    patterns: '*images'
+  register: dir_out
+  
+- set_fact:
+    matched: "{{ item.path | regex_search('^.*/(.+)/images$','\\1') }}"
+  loop: '{{ dir_out.files }}'
+  register: matching_items
+
+- name: Populate genders
+  set_fact:
+    images_dic: "{{ images_dic|default([]) + [ {'name': item.ansible_facts.matched[0], 'path': item.item.path} ] }}"
+  loop: '{{ matching_items.results }}'
+    
+- name: Create directory for data-web
+  ansible.builtin.file:
+    src: '{{ item.path }}'
+    dest: '{{ data_web_directory }}/photos/{{ item.name }}'
+    state: link
+  loop: '{{ images_dic }}'
+
+- name: Execute the command in remote shell; stdout goes to the specified file on the remote
+  ansible.builtin.shell: 'chown -h {{ default_user }}:{{ default_grp }} "{{ data_web_directory }}/photos/{{ item.name }}"'
+  loop: '{{ images_dic }}'
