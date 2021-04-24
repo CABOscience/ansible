@@ -28,24 +28,6 @@
     group : '{{ nfs_client_grp }}'
     mode  : 0755
 
-- name: Check if Service Exists
-  stat: path=/etc/init.d/tomcat8
-  register: service_status
-
-- name: Stop Service
-  service: name=tomcat8 state=stopped
-  when: service_status.stat.exists
-  register: service_stopped
-    
-- name: Check if Service Exists
-  stat: path=/etc/init.d/tomcat7
-  register: service_status
-
-- name: Stop Service
-  service: name=tomcat7 state=stopped
-  when: service_status.stat.exists
-  register: service_stopped
-    
 - name: Unmount nfs
   become: true
   mount:
@@ -56,7 +38,7 @@
     state: unmounted
   ignore_errors: yes
   
-- name: remount nfs
+- name: Present nfs
   become: true
   mount:
     path: '{{ nfs_client_path }}'

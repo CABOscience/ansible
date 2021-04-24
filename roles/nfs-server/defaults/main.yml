@@ -1,6 +1,6 @@
 ---
 apt_cache_valid_time: 3600
-nfs_client_pkg      : pakage
+nfs_server_pkg      : package
 nfs_client_path     : /data
 nfs_client_user     : user
 nfs_client_grp      : group

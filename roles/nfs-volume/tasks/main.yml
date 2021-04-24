@@ -32,14 +32,14 @@
     cache_valid_time: '{{ apt_cache_valid_time }}'
  
 - name: Umount partition
-  mount:
+  ansible.posix.mount:
     src: '{{ dev_part | default("/dev/vdb") }}1'
     path: '{{ mount_hdd_dir | default("/ext_data") }}'
     state: absent
   when: erase_hdd
 
 - name: Create partition
-  parted:
+  community.general.parted:
     label : gpt
     device: '{{ dev_part | default("/dev/vdb") }}'
     number: 1
@@ -54,8 +54,7 @@
   when: erase_hdd
 
 - name: Mount partition
-  become: true
-  mount:
+  ansible.posix.mount:
     fstype: ext4
     src: '{{ dev_part | default("/dev/vdb") }}1'
     path: '{{ mount_hdd_dir | default("/ext_data") }}'
@@ -63,14 +62,12 @@
   when: erase_hdd
 
 - name: Creates directory
-  become: true
   file:
     path  : '{{ mount_hdd_dir_data | default("/ext_data/data") }}'
     state : directory
   when: erase_hdd
 
 - name: Change owner directory
-  become: true
   file:
     path  : '{{ mount_hdd_dir_data | default("/ext_data/data") }}'
     owner : '{{ mount_hdd_dir_data_o | default("nobody") }}'

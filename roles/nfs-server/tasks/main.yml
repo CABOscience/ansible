@@ -1,0 +1,44 @@
+---
+- name: Update apt cache
+  become: true
+  apt:
+    update_cache: yes
+    cache_valid_time: '{{ apt_cache_valid_time }}'
+  register: update_action
+ 
+- name: Install {{ nfs_server_pkg }} packages ubuntu
+  become: true
+  apt:
+    pkg: '{{ nfs_server_pkg }}'
+    state: present
+    update_cache    : yes
+    cache_valid_time: '{{ apt_cache_valid_time }}'
+
+- name : Copy export file for sharing
+  become: true
+  template:
+    src  : exports.j2
+    dest : /etc/exports
+
+- name: Add VM hostnames in /etc/exports
+  become: true
+  replace:
+    path    : /etc/exports
+    regexp  : "^(####)$"
+    replace : '\1\n{{ nfs_server_path }} {{ item.ip }}(rw,sync,no_root_squash,no_subtree_check)'
+  loop: '{{ vm_infos }}'
+  notify:
+    - restart nfs_server
+
+#- name: Update UFW rules
+#  become: true
+#  ufw:
+#    rule  : 'allow'
+#    port  : 'nfs'
+#    from_ip: '{{ item.ip }}'
+#    delete: 'no'
+#  loop: '{{ vm_infos }}'
+#  notify:
+#    - reload ufw
+
+

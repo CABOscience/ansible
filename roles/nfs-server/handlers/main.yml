@@ -5,7 +5,6 @@
     name: '{{ nfs_server_app }}'
     state: restarted
 
-
 - name: reload ufw
   service:
     name    : '{{ ufw }}'
