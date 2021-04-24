@@ -13,13 +13,12 @@
         state : latest
 
   roles:
-    #- nfs-client
-    #- static-web
-    #- geerlingguy.nginx
-    #- geerlingguy.certbot
-    #- data-web
-    - cabo-psql
-    #- cabo-api
-    #- cabo-vis
+    - nfs-client
+    - static-web
+    - geerlingguy.nginx
+    - geerlingguy.certbot
+    - data-web
+    - cabo-api
+    - cabo-vis
     #- fail2ban
     #- fail2ban_nginx
