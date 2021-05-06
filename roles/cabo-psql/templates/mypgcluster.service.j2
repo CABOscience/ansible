@@ -3,11 +3,12 @@
 [Unit]
 Description=PostgreSQL Cluster {{ api_db_version }} {{ api_db_cluster_name }}
 AssertPathExists=/etc/postgresql/{{ api_db_version }}/{{ api_db_cluster_name }}/postgresql.conf
-RequiresMountsFor=/etc/postgresql/{{ api_db_version }}/{{ api_db_cluster_name }} /var/lib/postgresql/{{ api_db_version }}/{{ api_db_cluster_name }}
+RequiresMountsFor=/etc/postgresql/{{ api_db_version }}/{{ api_db_cluster_name }} {{ api_db_directory }}
 PartOf=postgresql.service
 ReloadPropagatedFrom=postgresql.service
 Before=postgresql.service
-After=network.target
+Requires=data.mount
+After=network.target data.mount
 
 [Service]
 Type=forking
@@ -18,8 +19,8 @@ TimeoutStartSec=0
 ExecStop=/usr/bin/pg_ctlcluster --skip-systemctl-redirect -m fast {{ api_db_version }} {{ api_db_cluster_name }} stop
 TimeoutStopSec=1h
 ExecReload=/usr/bin/pg_ctlcluster --skip-systemctl-redirect {{ api_db_version }} {{ api_db_cluster_name }} reload
-#PIDFile=/var/run/{{ api_user }}/mypostgresql/{{ api_db_version }}-{{ api_db_cluster_name }}.pid
-SyslogIdentifier=postgresql@{{ api_db_version }}-{{ api_db_cluster_name }}
+PIDFile={{ api_pid }}
+SyslogIdentifier=mypgcluster
 OOMScoreAdjust=-900
 
 [Install]

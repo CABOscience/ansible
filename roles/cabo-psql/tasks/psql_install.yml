@@ -13,6 +13,18 @@
     method: trust
     create: true
 
+- name: Overload the configuration
+  ansible.builtin.template:
+    src: mypgcluster.conf.j2
+    dest: '{{ api_db_directory }}/conf.d/mypgcluster.conf'
+  when: mypgcluster_conf_content is defined
+
+- name: Remove auto start
+  ansible.builtin.lineinfile:
+    path: '{{ api_db_directory }}/start.conf'
+    regexp: '^auto'
+    line: '#auto'
+    
 - name: Start deamon
   ansible.builtin.systemd:
     name: mypgcluster
